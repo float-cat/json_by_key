@@ -17,3 +17,5 @@
 
 ## Пример запуска
 ./jsonbykey -f input.json -k z
+
+В input.json корректный JSON документ.
