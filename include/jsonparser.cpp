@@ -5,7 +5,9 @@
 
 void JsonParser::ParseIt(string fname)
 {
-    /* Проверка открывались ли ковычки */
+    /* Проверка на массив */
+    bool isarray = false;
+    /* Проверка открывались ли кавычки */
     bool valueinq = false;
     bool inq = false;
     unsigned int state = read_key;
@@ -18,6 +20,17 @@ void JsonParser::ParseIt(string fname)
         throw "Open file error!";
     while(in.get(tmp))
     {
+        /* Игнорируем логику разбора, если массив */
+        if(isarray)
+        {
+            if(tmp == ']')
+                isarray = false;
+            else if(tmp == '"' || tmp == ',')
+            {
+                buffer.push_back(tmp);
+                continue;
+            }
+        }
         /* Разбираем документ JSON по следующей логике */
         switch(tmp)
         {
@@ -70,13 +83,20 @@ void JsonParser::ParseIt(string fname)
                 }
                 jsondom.LevelUp();
                 break;
-            /* Двойные ковычки */
+            /* Двойные кавычки */
             case '"':
-                /* Помечаем, что были ковычки у значения */
+                /* Помечаем, что были кавычки у значения */
                 if(!valueinq)
                     valueinq = true;
-                /* Интертируем флаг открытых ковычек */
+                /* Интертируем флаг открытых кавычек */
                 inq = !inq;
+                break;
+            /* Начался массив */
+            case '[':
+                /* Помечаем, что у нас открылся массив */
+                if(!isarray)
+                    isarray = true;
+                buffer.push_back(tmp);
                 break;
             default:
                 buffer.push_back(tmp);
